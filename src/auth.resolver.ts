@@ -3,7 +3,7 @@ import { Resolver, Mutation, Args, ObjectType, Field, Query, Context } from "@ne
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "./prisma.service";
 import * as bcrypt from "bcrypt";
-import { randomBytes } from "crypto";
+import { timingSafeEqual } from "crypto";
 
 @ObjectType() class AuthPayload { @Field() accessToken!: string; @Field() email!: string; @Field() profileName!: string; }
 @ObjectType() class AdminProfile { @Field() id!: string; @Field() email!: string; @Field() profileName!: string; }
@@ -40,7 +40,7 @@ export class AuthResolver {
  @Mutation(()=>Boolean)
  async initializeAdmin(@Args("setupKey") setupKey:string,@Args("email") email:string,@Args("password") password:string) {
   const expected=process.env.ADMIN_SETUP_KEY;
-  if(!expected || setupKey.length!==expected.length || !randomBytes(1).length || setupKey!==expected) throw new UnauthorizedException("Admin setup is disabled or invalid");
+  if(!expected || setupKey.length!==expected.length || !timingSafeEqual(Buffer.from(setupKey),Buffer.from(expected))) throw new UnauthorizedException("Admin setup is disabled or invalid");
   if(password.length<12) throw new BadRequestException("Password must be at least 12 characters");
   const count=await this.prisma.admin.count(); if(count>0) throw new BadRequestException("Administrator has already been initialized");
   const configuredEmail=(process.env.ADMIN_EMAIL||"").toLowerCase().trim();
