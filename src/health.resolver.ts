@@ -1,0 +1,1 @@
+import { Resolver, Query } from "@nestjs/graphql"; import { ObjectType, Field } from "@nestjs/graphql"; @ObjectType() class HealthStatus { @Field() status!: string; @Field() service!: string; } @Resolver() export class HealthResolver { @Query(() => HealthStatus) health(){ return {status:"ok",service:"drmululi-api"}; } }
