@@ -1,0 +1,13 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+enum OrderStatus { PENDING CONFIRMED PROCESSING SHIPPED COMPLETED CANCELLED }
+enum ReviewStatus { PENDING APPROVED REJECTED }
+model Admin { id String @id @default(cuid()) email String @unique passwordHash String profileName String @default("Administrator") createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model Product { id String @id @default(cuid()) name String description String category String price Int currency String @default("UGX") imageUrl String? active Boolean @default(true) stock Int @default(0) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt reviews Review[] orderItems OrderItem[] }
+model Customer { id String @id @default(cuid()) name String phone String? email String? address String? createdAt DateTime @default(now()) orders Order[] }
+model Order { id String @id @default(cuid()) customerId String customer Customer @relation(fields:[customerId], references:[id]) status OrderStatus @default(PENDING) total Int currency String @default("UGX") notes String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt items OrderItem[] }
+model OrderItem { id String @id @default(cuid()) orderId String order Order @relation(fields:[orderId], references:[id], onDelete:Cascade) productId String product Product @relation(fields:[productId], references:[id]) quantity Int unitPrice Int }
+model Review { id String @id @default(cuid()) name String email String? rating Int productId String? product Product? @relation(fields:[productId], references:[id]) body String status ReviewStatus @default(PENDING) createdAt DateTime @default(now()) }
+model NewsletterSubscription { id String @id @default(cuid()) email String @unique createdAt DateTime @default(now()) }
+model ContactSubmission { id String @id @default(cuid()) name String phone String? email String message String status String @default("NEW") createdAt DateTime @default(now()) }
+model SiteSetting { id String @id @default(cuid()) key String @unique value String updatedAt DateTime @updatedAt }
