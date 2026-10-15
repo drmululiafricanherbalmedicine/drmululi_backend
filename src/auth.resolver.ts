@@ -21,7 +21,7 @@ export class AuthResolver {
  async login(@Args("email") email:string,@Args("password") password:string) {
   const admin=await this.prisma.admin.findUnique({where:{email:email.toLowerCase().trim()}});
   if(!admin || !(await bcrypt.compare(password,admin.passwordHash))) throw new UnauthorizedException("Invalid credentials");
-  const accessToken=await this.jwt.signAsync({sub:admin.id,email:admin.email},{expiresIn:process.env.JWT_EXPIRES_IN||"15m"});
+  const accessToken=await this.jwt.signAsync({sub:admin.id,email:admin.email},{expiresIn:(process.env.JWT_EXPIRES_IN||"15m") as any});
   return {accessToken,email:admin.email,profileName:admin.profileName};
  }
  @Query(()=>AdminProfile)
