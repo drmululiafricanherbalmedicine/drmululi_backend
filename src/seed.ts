@@ -1,0 +1,4 @@
+import { PrismaClient } from "@prisma/client"; import * as bcrypt from "bcrypt";
+const prisma=new PrismaClient();
+async function main(){const email=(process.env.ADMIN_EMAIL||"").trim().toLowerCase();const password=process.env.INITIAL_ADMIN_PASSWORD;if(!email||!password)throw new Error("Set ADMIN_EMAIL and INITIAL_ADMIN_PASSWORD for one-time administrator setup");if(password.length<12)throw new Error("Initial administrator password must be at least 12 characters");const existing=await prisma.admin.findUnique({where:{email}});if(existing){console.log("Administrator already exists; seed left unchanged.");return;}await prisma.admin.create({data:{email,passwordHash:await bcrypt.hash(password,12)}});console.log("Initial administrator created.");}
+main().finally(()=>prisma.$disconnect());
